@@ -9,7 +9,8 @@ const auth = (req, res, next) => {
     if (token) {
       try {
         const user = jwt.verify(token, process.env.JWT_SECRET_KEY);
-        req.body._id = user._id;
+        req.body.auth.username = user.username;
+        req.body.auth.password = user.password;
         return next();
       } catch (err) {
         const errors = new Error();
