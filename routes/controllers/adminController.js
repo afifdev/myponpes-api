@@ -13,17 +13,17 @@ const login = async (req, res, next) => {
         { username: req.body.username, password: req.body.password },
         process.env.JWT_SECRET_KEY
       );
-      res.json({ message: "Success", data: token });
+      res.json({ message: "Success", data: { token, level: admin.level } });
     } else {
       const err = new Error();
       err.message = "Error on password";
-      err.data = "Password mismatch";
+      err.data.error = "Password mismatch";
       next(err);
     }
   } else {
     const err = new Error();
     err.message = "Error occured";
-    err.data = "Admin not found";
+    err.data.error = "Admin not found";
     next(err);
   }
 };
