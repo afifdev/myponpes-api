@@ -11,6 +11,7 @@ const auth = (req, res, next) => {
         const user = jwt.verify(token, process.env.JWT_SECRET_KEY);
         req.body.auth.username = user.username;
         req.body.auth.password = user.password;
+        req.body.auth.level = user.level;
         return next();
       } catch (err) {
         const errors = new Error();
