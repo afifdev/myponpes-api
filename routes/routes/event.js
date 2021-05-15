@@ -8,24 +8,21 @@ const uploads = multer({
   fileFilter: fileFilter,
 }).array("images");
 
-// [POST]
 // http://localhost:4000/api/event
-routes.post("/", uploads, eventControllers.postEvent);
 
 // [GET]
-// http://localhost:4000/api/event
 routes.get("/", eventControllers.getEvents);
 
 // [GET]
-// http://localhost:4000/api/event/:id
 routes.get("/:id", eventControllers.getEvent);
 
+// [POST]
+routes.post("/", uploads, eventControllers.postEvent);
+
 // [PUT]
-// http://localhost:4000/api/event/:id
 routes.put("/:id", uploads, eventControllers.updateEvent);
 
 // [DELETE]
-// http://localhost:4000/api/event/:id
-routes.delete("/:id", uploads, eventControllers.deleteEvent);
+routes.delete("/:id", eventControllers.deleteEvent);
 
 module.exports = routes;
