@@ -8,7 +8,9 @@ const upload = multer({
   fileFilter: fileFilter,
 }).single("image");
 
+// http://localhost:4000/api/admin
+
 // [POST]
-// http://localhost:4000/api/event
 routes.post("/", upload, adminControllers.login);
+
 module.exports = routes;
