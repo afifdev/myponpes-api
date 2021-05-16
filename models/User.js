@@ -17,18 +17,6 @@ const User = new Schema({
   date_out: String,
   active_until: String,
   level: Number,
-  payment: [
-    {
-      title: String,
-      desc: String,
-      amount: String,
-      sent_amount: String,
-      due_date: String,
-      ref_code: String,
-      image: String,
-      is_complete: Boolean,
-    },
-  ],
   progress: {
     hafalan: [
       {
