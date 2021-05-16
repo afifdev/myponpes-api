@@ -1,6 +1,7 @@
 const multer = require("multer");
 const { fileFilter, fileStorage } = require("../../config/file");
-const routes = require("./event");
+const express = require("express");
+const routes = express.Router();
 const userControllers = require("../controllers/userController");
 const auth = require("../../utils/auth");
 const upload = multer({
