@@ -3,7 +3,7 @@ const mongoose = require("mongoose");
 const path = require("path");
 const cors = require("cors");
 const app = express();
-const { eventRoutes, adminRoutes, userRoutes } = require("./routes/routes");
+const { eventRoutes, adminRoutes } = require("./routes/routes");
 const dotenv = require("dotenv");
 dotenv.config();
 
@@ -16,7 +16,6 @@ app.use("/images", express.static(path.join(__dirname, "images")));
 // Routes
 app.use("/api/event", eventRoutes);
 app.use("/api/admin", adminRoutes);
-app.use("/api/user", userRoutes);
 
 // Server
 mongoose
