@@ -1,5 +1,8 @@
 const Event = require("../../models/Event");
+const fs = require("fs");
+const path = require("path");
 const dotenv = require("dotenv");
+const { isValidObjectId } = require("mongoose");
 dotenv.config();
 
 const getEvents = async (req, res, next) => {
@@ -18,6 +21,12 @@ const getEvents = async (req, res, next) => {
 
 const getEvent = async (req, res, next) => {
   const _id = req.params.id;
+  if (!isValidObjectId) {
+    return res.json({
+      message: "Error",
+      data: "Cannot identify",
+    });
+  }
   const event = await Event.findOne({ _id });
   if (event) {
     return res.json({
@@ -31,7 +40,7 @@ const getEvent = async (req, res, next) => {
   });
 };
 
-const postEvent = (req, res, next) => {
+const postEvent = async (req, res, next) => {
   if (
     !req.body.title ||
     !req.body.category ||
@@ -58,65 +67,102 @@ const postEvent = (req, res, next) => {
     images,
   });
 
-  event
-    .save()
-    .then((r) => {
-      res.json({
-        message: "Success",
-        data: r,
-      });
-    })
-    .catch((e) => {
-      res.json({
-        message: "Error",
-        data: "Failed to post",
-      });
+  const saveEvent = await event.save();
+  if (saveEvent) {
+    res.json({
+      message: "Success",
+      data: saveEvent,
     });
-};
-
-const updateEvent = (req, res, next) => {
-  const _id = req.params.id;
-  const data = {};
-  if (req.files.length > 0) {
-    const paths = [];
-    req.files.map((image) => {
-      paths.push(image.path);
-    });
-    // Delete previous image
-    data.field = { ...req.body, image: paths };
   } else {
-    data.field = { ...req.body };
-  }
-  Event.findByIdAndUpdate(_id, { ...data.field }, { useFindAndModify: false })
-    .then((event) => {
-      res.json({
-        message: "Success",
-        data: event,
-      });
-    })
-    .catch((err) => {
-      res.json({
-        message: "Error",
-        data: "Cannot post for some reason",
-      });
+    res.json({
+      message: "Error",
+      data: "Failed to post",
     });
+  }
 };
 
-const deleteEvent = (req, res, next) => {
-  const _id = req.params.id;
-  Event.findOneAndRemove({ _id }, { useFindAndModify: false })
-    .then((r) => {
-      res.json({
-        message: "Success",
-        data: r,
-      });
-    })
-    .catch((e) => {
-      res.json({
-        message: "Error",
-        data: "Cannot delete post",
-      });
+const updateEvent = async (req, res, next) => {
+  if (!isValidObjectId) {
+    return res.json({
+      message: "Error",
+      data: "Cannot identify",
     });
+  }
+
+  if (!req.body) {
+    return res.json({
+      message: "Error",
+      data: "Fill the body fields",
+    });
+  }
+
+  const _id = req.params.id;
+  const images = [];
+
+  if (req.files.length > 0) {
+    const event = await Event.findOne({ _id }, "images");
+
+    if (!event) {
+      req.files.map((image) => {
+        fs.unlinkSync(path.join(__dirname, `../../${image.path}`));
+      });
+      return res.json({
+        message: "Error",
+        data: "Event not found",
+      });
+    }
+
+    req.files.map((image) => {
+      images.push(image.path);
+    });
+    event.images.map((image) => {
+      fs.unlinkSync(path.join(__dirname, `../../${image}`));
+    });
+  }
+
+  const event = await Event.findOneAndUpdate(
+    { _id },
+    { $set: { ...req.body, images } },
+    { useFindAndModify: false }
+  );
+  if (event) {
+    return res.json({
+      message: "Success",
+      data: event,
+    });
+  }
+  return res.json({
+    message: "Error",
+    data: "Error",
+  });
+};
+
+const deleteEvent = async (req, res, next) => {
+  const _id = req.params.id;
+  if (!isValidObjectId) {
+    return res.json({
+      message: "Error",
+      data: "Cannot identify",
+    });
+  }
+  const removedEvent = await Event.findOneAndRemove(
+    { _id },
+    { useFindAndModify: false }
+  );
+  if (removedEvent) {
+    removedEvent.images.map((image) => {
+      fs.unlinkSync(path.join(__dirname, `../../${image}`));
+    });
+    res.json({
+      message: "Success",
+      data: removedEvent,
+    });
+  } else {
+    res.json({
+      message: "Error",
+      data: "Cannot delete post",
+    });
+  }
 };
 
 module.exports = { postEvent, getEvent, getEvents, updateEvent, deleteEvent };
