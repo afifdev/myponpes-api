@@ -33,6 +33,20 @@ const login = async (req, res, next) => {
 };
 
 const getUsers = async (req, res, next) => {
+  const authAdmin = await Admin.findOne({ username: req.body.authUsername });
+  if (!authAdmin) {
+    return res.json({
+      message: "Error",
+      data: "Unauthorized",
+    });
+  }
+  const isMatch = await compare(req.body.authPassword, authAdmin.password);
+  if (!isMatch) {
+    return res.json({
+      message: "Error",
+      data: "Credential error",
+    });
+  }
   const user = await User.find();
   return res.json({
     message: "Success",
