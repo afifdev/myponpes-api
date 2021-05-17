@@ -49,12 +49,14 @@ routes.get(
 );
 routes.post(
   "/withlevel/hafalan/:id",
+  formHandler,
   auth,
   checkUserLevel,
   userControllers.withLevelAddHafalan
 );
 routes.post(
   "/withlevel/kitab/:id",
+  formHandler,
   auth,
   checkUserLevel,
   userControllers.withLevelAddKitab
@@ -68,24 +70,28 @@ routes.post(
 );
 routes.post(
   "/withlevel/returning/:id",
+  formHandler,
   auth,
   checkUserLevel,
   userControllers.withLevelAddReturning
 );
 routes.put(
   "/withlevel/returning/:id",
+  formHandler,
   auth,
   checkUserLevel,
   userControllers.withLevelUpdateReturning
 );
 routes.post(
   "/withlevel/jamaah/:id",
+  formHandler,
   auth,
   checkUserLevel,
   userControllers.withLevelAddJamaah
 );
 routes.post(
   "/withlevel/ngaji/:id",
+  formHandler,
   auth,
   checkUserLevel,
   userControllers.withLevelAddNgaji

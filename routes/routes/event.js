@@ -4,6 +4,7 @@ const eventControllers = require("../controllers/eventController");
 const auth = require("../../utils/auth");
 const checkUserLevel = require("../../utils/checkUserLevel");
 const multer = require("multer");
+const formHandler = multer().none();
 const { fileFilter, eventStorage } = require("../../config/file");
 const eventUpload = multer({
   fileFilter: fileFilter,
@@ -17,7 +18,7 @@ routes.get("/:id", auth, eventControllers.getEvent);
 routes.post("/", eventUpload, auth, checkUserLevel, eventControllers.postEvent);
 routes.put(
   "/:id",
-  eventUpload,
+  formHandler,
   auth,
   checkUserLevel,
   eventControllers.updateEvent
