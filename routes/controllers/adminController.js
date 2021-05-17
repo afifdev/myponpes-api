@@ -6,6 +6,7 @@ const fs = require("fs");
 const path = require("path");
 const dotenv = require("dotenv");
 const { isValidObjectId } = require("mongoose");
+const Transaction = require("../../models/Transaction");
 dotenv.config();
 
 const login = async (req, res, next) => {
@@ -214,4 +215,224 @@ const deleteUser = async (req, res, next) => {
     data: "Unauthorized",
   });
 };
-module.exports = { login, registerUser, updateUser, deleteUser, getUsers };
+
+const getTransactions = async (req, res, next) => {
+  const authAdmin = await Admin.findOne({ username: req.body.authUsername });
+  if (!authAdmin) {
+    return res.json({
+      message: "Error",
+      data: "Unauthorized",
+    });
+  }
+  const isMatch = await compare(req.body.authPassword, authAdmin.password);
+  if (!isMatch) {
+    return res.json({
+      message: "Error",
+      data: "Credential error",
+    });
+  }
+  const transactions = await Transaction.find();
+  if (!transactions) {
+    return res.json({
+      message: "Error",
+      data: "Failed fetching transaction",
+    });
+  }
+  return res.json({
+    message: "Success",
+    data: transactions,
+  });
+};
+
+const getTransaction = async (req, res, next) => {
+  const _id = req.params.id;
+  if (!isValidObjectId(_id)) {
+    return res.json({
+      message: "Error",
+      data: "Invalid identifier",
+    });
+  }
+  const authAdmin = await Admin.findOne({ username: req.body.authUsername });
+  if (!authAdmin) {
+    return res.json({
+      message: "Error",
+      data: "Unauthorized",
+    });
+  }
+  const isMatch = await compare(req.body.authPassword, authAdmin.password);
+  if (!isMatch) {
+    return res.json({
+      message: "Error",
+      data: "Credential error",
+    });
+  }
+  const transaction = await Transaction.findOne({ _id });
+  if (!transaction) {
+    return res.json({
+      message: "Error",
+      data: "Failed fetching transaction",
+    });
+  }
+  return res.json({
+    message: "Success",
+    data: transaction,
+  });
+};
+
+const addTransaction = async (req, res, next) => {
+  if (req.body._id) {
+    delete req.body._id;
+  }
+  const authAdmin = await Admin.findOne({ username: req.body.authUsername });
+  if (!authAdmin) {
+    return res.json({
+      message: "Error",
+      data: "Unauthorized",
+    });
+  }
+  const isMatch = await compare(req.body.authPassword, authAdmin.password);
+  if (!isMatch) {
+    return res.json({
+      message: "Error",
+      data: "Credential error",
+    });
+  }
+  if (
+    !req.body.title ||
+    !req.body.desc ||
+    !req.body.amount ||
+    !req.body.due_date ||
+    !req.body.ref_code ||
+    !req.body.usersId ||
+    req.body.usersId.length === 0
+  ) {
+    console.log(req.body.usersId);
+    return res.json({
+      message: "Error",
+      data: "Fill out the fields",
+    });
+  }
+  const insertedUser = [];
+  for (let i = 0; i < req.body.usersId.length; i++) {
+    if (!isValidObjectId(req.body.usersId[i])) {
+      console.log(req.body.usersId[i]);
+      return res.json({ message: "Error", data: "Invalid identifier" });
+    }
+    const checkUserId = await User.findOne({ _id: req.body.usersId[i] });
+    if (!checkUserId) {
+      return res.json({
+        message: "Error",
+        data: "Cannot find user",
+      });
+    }
+    insertedUser.push({ user_id: req.body.usersId[i] });
+  }
+  const data = {
+    title: req.body.title,
+    desc: req.body.desc,
+    amout: req.body.amount,
+    due_date: req.body.due_date,
+    ref_code: req.body.ref_code,
+    users: insertedUser,
+  };
+  const transaction = new Transaction({
+    ...data,
+  });
+  const saving = await transaction.save();
+  if (saving) {
+    return res.json({
+      message: "Success",
+      data: saving,
+    });
+  }
+  return res.json({
+    message: "Error",
+    data: "Cannot save for some reason",
+  });
+};
+
+const updateTransaction = async (req, res, next) => {
+  const _id = req.params.id;
+  if (!isValidObjectId(_id)) {
+    return res.json({
+      message: "Error",
+      data: "Invalid identifier",
+    });
+  }
+  if (req.body._id) {
+    delete req.body._id;
+  }
+  const authAdmin = await Admin.findOne({ username: req.body.authUsername });
+  if (!authAdmin) {
+    return res.json({
+      message: "Error",
+      data: "Unauthorized",
+    });
+  }
+  const isMatch = await compare(req.body.authPassword, authAdmin.password);
+  if (!isMatch) {
+    return res.json({
+      message: "Error",
+      data: "Credential error",
+    });
+  }
+  const prevTransaction = await Transaction.findOne({ _id });
+  if (!prevTransaction) {
+    return res.json({
+      message: "Error",
+      data: "Failed fetching transaction",
+    });
+  }
+  const dataUpdater = { ...prevTransaction, ...req.body };
+};
+
+const deleteTransaction = async (req, res, next) => {
+  const _id = req.params.id;
+  if (!isValidObjectId(_id)) {
+    return res.json({
+      message: "Error",
+      data: "Invalid identifier",
+    });
+  }
+  const authAdmin = await Admin.findOne({ username: req.body.authUsername });
+  if (!authAdmin) {
+    return res.json({
+      message: "Error",
+      data: "Unauthorized",
+    });
+  }
+  const isMatch = await compare(req.body.authPassword, authAdmin.password);
+  if (!isMatch) {
+    return res.json({
+      message: "Error",
+      data: "Credential error",
+    });
+  }
+  const transaction = await Transaction.findOneAndRemove(
+    { _id },
+    { useFindAndModify: false }
+  );
+  if (!transaction) {
+    return res.json({
+      message: "Error",
+      data: "Failed fetching transaction",
+    });
+  }
+  return res.json({
+    message: "Success",
+    data: transaction,
+  });
+};
+
+module.exports = {
+  login,
+  registerUser,
+  updateUser,
+  deleteUser,
+  getUsers,
+  getTransactions,
+  getTransaction,
+  addTransaction,
+  // updateTransaction,
+  deleteTransaction,
+};
