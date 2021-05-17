@@ -1,29 +1,94 @@
 const express = require("express");
 const routes = express.Router();
+const userControllers = require("../controllers/userController");
+const auth = require("../../utils/auth");
+const checkUserLevel = require("../../utils/checkUserLevel");
+const checkUser = require("../../utils/checkUser");
 const multer = require("multer");
+const formHandler = multer().none();
 const {
   fileFilter,
-  fileStorage,
-  multifileStorage,
+  userStorage,
+  achievementStorage,
+  transactionStorage,
 } = require("../../config/file");
-const auth = require("../../utils/auth");
-const upload = multer({
+const userUpload = multer({
   fileFilter: fileFilter,
-  storage: fileStorage,
+  storage: userStorage,
 }).single("image");
-const uploads = multer({
-  fileFilter,
-  storage: multifileStorage,
-}).array("images");
-const formHandler = multer().none();
-const userControllers = require("../controllers/userController");
+const transactionUpload = multer({
+  fileFilter: fileFilter,
+  storage: transactionStorage,
+}).single("image");
+const achievementUpload = multer({
+  fileFilter: fileFilter,
+  storage: achievementStorage,
+}).single("image");
 
 // http://localhost:4000/api/user
 
 routes.post("/login", formHandler, userControllers.loginUser);
-routes.get("/", auth, userControllers.getUser);
-routes.put("/", upload, auth, userControllers.updateUser);
+routes.get("/", auth, checkUser, userControllers.getUser);
+routes.put("/", userUpload, auth, checkUser, userControllers.updateUser);
+routes.get("/transaction", auth, checkUser, userControllers.getMyTransaction);
+routes.put(
+  "/transaction/:id",
+  transactionUpload,
+  auth,
+  checkUser,
+  userControllers.updateMyTransaction
+);
 
 // LEVELING --------------------------
+
+routes.get(
+  "/withlevel",
+  auth,
+  checkUserLevel,
+  userControllers.withLevelGetUsers
+);
+routes.post(
+  "/withlevel/hafalan/:id",
+  auth,
+  checkUserLevel,
+  userControllers.withLevelAddHafalan
+);
+routes.post(
+  "/withlevel/kitab/:id",
+  auth,
+  checkUserLevel,
+  userControllers.withLevelAddKitab
+);
+routes.post(
+  "/withlevel/achievement/:id",
+  achievementUpload,
+  auth,
+  checkUserLevel,
+  userControllers.withLevelAddAchievement
+);
+routes.post(
+  "/withlevel/returning/:id",
+  auth,
+  checkUserLevel,
+  userControllers.withLevelAddReturning
+);
+routes.put(
+  "/withlevel/returning/:id",
+  auth,
+  checkUserLevel,
+  userControllers.withLevelUpdateReturning
+);
+routes.post(
+  "/withlevel/jamaah/:id",
+  auth,
+  checkUserLevel,
+  userControllers.withLevelAddJamaah
+);
+routes.post(
+  "/withlevel/ngaji/:id",
+  auth,
+  checkUserLevel,
+  userControllers.withLevelAddNgaji
+);
 
 module.exports = routes;

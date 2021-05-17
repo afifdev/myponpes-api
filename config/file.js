@@ -10,7 +10,7 @@ const fileFilter = (req, file, cb) => {
     cb(null, false);
   }
 };
-const fileStorage = diskStorage({
+const userStorage = diskStorage({
   destination: (req, file, cb) => {
     cb(null, "images");
   },
@@ -18,7 +18,7 @@ const fileStorage = diskStorage({
     cb(null, new Date().getTime() + "-" + file.originalname);
   },
 });
-const multifileStorage = diskStorage({
+const eventStorage = diskStorage({
   destination: (req, file, cb) => {
     cb(null, "images/events");
   },
@@ -26,5 +26,27 @@ const multifileStorage = diskStorage({
     cb(null, new Date().getTime() + "-" + file.originalname);
   },
 });
+const transactionStorage = diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, "images/transactions");
+  },
+  filename: (req, file, cb) => {
+    cb(null, new Date().getTime() + "-" + file.originalname);
+  },
+});
+const achievementStorage = diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, "images/achievements");
+  },
+  filename: (req, file, cb) => {
+    cb(null, new Date().getTime() + "-" + file.originalname);
+  },
+});
 
-module.exports = { fileFilter, fileStorage, multifileStorage };
+module.exports = {
+  fileFilter,
+  userStorage,
+  eventStorage,
+  transactionStorage,
+  achievementStorage,
+};

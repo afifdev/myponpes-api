@@ -1,8 +1,8 @@
 const Event = require("../../models/Event");
 const fs = require("fs");
 const path = require("path");
-const dotenv = require("dotenv");
 const { isValidObjectId } = require("mongoose");
+const dotenv = require("dotenv");
 dotenv.config();
 
 const getEvents = async (req, res, next) => {
