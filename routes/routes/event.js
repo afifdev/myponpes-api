@@ -10,19 +10,10 @@ const uploads = multer({
 
 // http://localhost:4000/api/event
 
-// [GET]
 routes.get("/", eventControllers.getEvents);
-
-// [GET]
 routes.get("/:id", eventControllers.getEvent);
-
-// [POST]
 routes.post("/", uploads, eventControllers.postEvent);
-
-// [PUT]
 routes.put("/:id", uploads, eventControllers.updateEvent);
-
-// [DELETE]
 routes.delete("/:id", eventControllers.deleteEvent);
 
 module.exports = routes;
