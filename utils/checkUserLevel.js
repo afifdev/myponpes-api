@@ -16,6 +16,7 @@ const checkUserLevel = async (req, res, next) => {
       data: "Credential error",
     });
   }
+  req.body.validateLeveledUser = leveledUser;
   return next();
 };
 
