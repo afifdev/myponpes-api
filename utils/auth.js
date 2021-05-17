@@ -13,18 +13,21 @@ const auth = (req, res, next) => {
         req.body.authPassword = user.password;
         return next();
       } catch (err) {
-        const errors = new Error();
-        errors.message = "Invalid/Expired token";
-        return next(errors);
+        return res.json({
+          message: "Error",
+          data: "Invalid or Expired Token",
+        });
       }
     }
-    const errors = new Error();
-    errors.message = "Token should be: Bearer [token]";
-    return next(errors);
+    return res.json({
+      message: "Error",
+      data: "Token should be: Bearer [token]",
+    });
   }
-  const errors = new Error();
-  errors.message = "Token must be provided";
-  return next(errors);
+  return res.json({
+    message: "Error",
+    data: "Token must be provided",
+  });
 };
 
 module.exports = auth;
