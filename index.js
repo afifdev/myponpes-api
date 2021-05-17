@@ -17,6 +17,13 @@ app.use("/images", express.static(path.join(__dirname, "images")));
 app.use("/api/event", eventRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/user", userRoutes);
+app.use((err, req, res, next) => {
+  res.json({
+    message: "Error",
+    data: "Please using API carefully",
+  });
+  next();
+});
 
 // Server
 mongoose
