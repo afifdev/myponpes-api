@@ -4,7 +4,10 @@ const fs = require("fs");
 const path = require("path");
 
 const checkAdmin = async (req, res, next) => {
-  const authAdmin = await Admin.findOne({ username: req.body.authUsername });
+  const authAdmin = await Admin.findOne(
+    { username: req.body.authUsername },
+    "username password"
+  );
   if (!authAdmin) {
     if (req.file) {
       const removeImage = fs.unlinkSync(

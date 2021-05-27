@@ -2,7 +2,10 @@ const { compare } = require("bcrypt");
 const User = require("../models/User");
 
 const checkUserLevel = async (req, res, next) => {
-  const leveledUser = await User.findOne({ username: req.body.authUsername });
+  const leveledUser = await User.findOne(
+    { username: req.body.authUsername },
+    "username password level"
+  );
   if (!leveledUser || leveledUser.level === 0) {
     return res.json({
       message: "Error",
