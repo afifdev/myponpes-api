@@ -6,6 +6,7 @@ const Transaction = new Schema({
   amount: String,
   due_date: String,
   ref_code: String,
+  is_complete: Boolean,
   users: [
     {
       user_id: String,
