@@ -6,7 +6,6 @@ const jwt = require("jsonwebtoken");
 const { compare } = require("bcrypt");
 const { isValidObjectId } = require("mongoose");
 const dotenv = require("dotenv");
-const { errorMonitor } = require("events");
 dotenv.config();
 const loginUser = async (req, res, next) => {
   try {
@@ -31,7 +30,11 @@ const loginUser = async (req, res, next) => {
       });
     }
     const token = await jwt.sign(
-      { username: user.username, password: req.body.password },
+      {
+        username: user.username,
+        password: req.body.password,
+        level: user.level,
+      },
       process.env.JWT_SECRET_KEY
     );
     res.json({
@@ -47,15 +50,39 @@ const loginUser = async (req, res, next) => {
 };
 
 const getUser = async (req, res, next) => {
-  try {
-    const user = req.body.validateUser;
-    res.json({
-      message: "Success",
-      data: user,
-    });
-  } catch (err) {
-    next(err);
+  let needing = null;
+  const needingArray = [
+    "profile",
+    "hafalan",
+    "kitab",
+    "attendance",
+    "achievement",
+    "returning",
+  ];
+  if (req.query.needing && needingArray.includes(req.query.needing)) {
+    needing = req.query.needing;
+    if (needing === "profile") {
+      needing = "username name image phone_number parent_phone_number";
+    } else {
+      needing = `progress.${needing}`;
+    }
+    try {
+      const user = await User.findOne(
+        { username: req.body.authUsername },
+        needing
+      );
+      return res.json({
+        message: "Success",
+        data: user,
+      });
+    } catch (err) {
+      return next(err);
+    }
   }
+  return res.json({
+    message: "Error",
+    data: "Please type what you need",
+  });
 };
 
 const updateUser = async (req, res, next) => {
@@ -63,7 +90,10 @@ const updateUser = async (req, res, next) => {
     if (req.body._id) {
       delete req.body._id;
     }
-    const user = req.body.validateUser;
+    const user = await User.findOne(
+      { username: req.body.authUsername },
+      "name image phone_number parent_phone_number"
+    );
     const data = {
       name: req.body.name ? req.body.name : user.name,
       phone_number: req.body.phone_number
@@ -95,7 +125,7 @@ const updateUser = async (req, res, next) => {
     }
     return res.json({
       message: "Success",
-      data: updatedUser,
+      data: "Data has been updated",
     });
   } catch (err) {
     next(err);
