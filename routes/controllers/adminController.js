@@ -26,7 +26,11 @@ const login = async (req, res, next) => {
       });
     }
     const token = await jwt.sign(
-      { username: req.body.username, password: req.body.password },
+      {
+        username: req.body.username,
+        password: req.body.password,
+        level: admin.level,
+      },
       process.env.JWT_SECRET_KEY
     );
     res.json({ message: "Success", data: { token, level: admin.level } });
