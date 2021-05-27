@@ -27,7 +27,6 @@ const checkUser = async (req, res, next) => {
       data: "Credential error",
     });
   }
-  req.body.validateUser = user;
   return next();
 };
 
