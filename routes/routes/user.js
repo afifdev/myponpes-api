@@ -27,16 +27,24 @@ const achievementUpload = multer({
 
 // http://localhost:4000/api/user
 
-routes.post("/login", formHandler, userControllers.loginUser);
+// Login
+routes.post("/", formHandler, userControllers.loginUser);
+// Get Me (What do you need)
 routes.get("/", auth, checkUser, userControllers.getUser);
+// Update Me
 routes.put("/", userUpload, auth, checkUser, userControllers.updateUser);
-routes.get("/transaction", auth, checkUser, userControllers.getMyTransaction);
+
+// TRANSACTION ----------------------
+
+// Get My Transaction
+routes.get("/transaction", auth, checkUser, userControllers.getMyPayment);
+// Get My Detailed Transaction
 routes.put(
   "/transaction/:id",
   transactionUpload,
   auth,
   checkUser,
-  userControllers.updateMyTransaction
+  userControllers.updateMyPayment
 );
 
 // LEVELING --------------------------

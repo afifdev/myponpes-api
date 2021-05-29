@@ -1,6 +1,6 @@
 const Admin = require("../../models/Admin");
 const User = require("../../models/User");
-const Transaction = require("../../models/Transaction");
+const Payment = require("../../models/Payment");
 const jwt = require("jsonwebtoken");
 const fs = require("fs");
 const path = require("path");
@@ -40,8 +40,9 @@ const login = async (req, res, next) => {
 };
 
 const getUsers = async (req, res, next) => {
+  const username = req.query.username;
   try {
-    const user = await User.find();
+    const user = await User.find({ username });
     return res.json({
       message: "Success",
       data: user,
@@ -217,9 +218,9 @@ const deleteUser = async (req, res, next) => {
   }
 };
 
-const getTransactions = async (req, res, next) => {
+const getPayments = async (req, res, next) => {
   try {
-    const transactions = await Transaction.find();
+    const transactions = await Payment.find();
     if (!transactions) {
       return res.json({
         message: "Error",
@@ -235,7 +236,7 @@ const getTransactions = async (req, res, next) => {
   }
 };
 
-const getTransaction = async (req, res, next) => {
+const getPayment = async (req, res, next) => {
   try {
     const _id = req.params.id;
     if (!isValidObjectId(_id)) {
@@ -244,7 +245,7 @@ const getTransaction = async (req, res, next) => {
         data: "Invalid identifier",
       });
     }
-    const transaction = await Transaction.findOne({ _id });
+    const transaction = await Payment.findOne({ _id });
     if (!transaction) {
       return res.json({
         message: "Error",
@@ -260,7 +261,7 @@ const getTransaction = async (req, res, next) => {
   }
 };
 
-const addTransaction = async (req, res, next) => {
+const addPayment = async (req, res, next) => {
   try {
     if (req.body._id) {
       delete req.body._id;
@@ -301,7 +302,7 @@ const addTransaction = async (req, res, next) => {
       ref_code: req.body.ref_code,
       users: insertedUser,
     };
-    const transaction = new Transaction({
+    const transaction = new Payment({
       ...data,
     });
     const saving = await transaction.save();
@@ -320,7 +321,7 @@ const addTransaction = async (req, res, next) => {
   }
 };
 
-const verifyUserTransaction = async (req, res, next) => {
+const verifyUserPayment = async (req, res, next) => {
   try {
     const _id = req.params.id;
     if (!isValidObjectId(_id)) {
@@ -352,10 +353,7 @@ const verifyUserTransaction = async (req, res, next) => {
         due_date: req.body.due_date,
         ref_code: req.body.ref_code,
       };
-      const transaction = await Transaction.findOneAndUpdate(
-        { _id },
-        { ...data }
-      );
+      const transaction = await Payment.findOneAndUpdate({ _id }, { ...data });
       if (!transaction) {
         return res.json({
           message: "Error",
@@ -367,7 +365,7 @@ const verifyUserTransaction = async (req, res, next) => {
         data: transaction,
       });
     } else if (req.body.user_id && !req.body.users_id) {
-      const transaction = await Transaction.findOneAndUpdate(
+      const transaction = await Payment.findOneAndUpdate(
         { _id, "users.user_id": req.body.user_id },
         { $set: { "users.$.is_complete": true } }
       );
@@ -387,7 +385,7 @@ const verifyUserTransaction = async (req, res, next) => {
           return { user_id: userId };
         }),
       ];
-      const transaction = await Transaction.findOneAndUpdate(
+      const transaction = await Payment.findOneAndUpdate(
         { _id },
         { $set: { "users.$[elem].is_complete": true } },
         { arrayFilters: usersId, multi: true },
@@ -413,7 +411,7 @@ const verifyUserTransaction = async (req, res, next) => {
   }
 };
 
-const deleteTransaction = async (req, res, next) => {
+const deletePayment = async (req, res, next) => {
   try {
     const _id = req.params.id;
     if (!isValidObjectId(_id)) {
@@ -422,7 +420,7 @@ const deleteTransaction = async (req, res, next) => {
         data: "Invalid identifier",
       });
     }
-    const transaction = await Transaction.findOneAndRemove(
+    const transaction = await Payment.findOneAndRemove(
       { _id },
       { useFindAndModify: false }
     );
@@ -452,9 +450,9 @@ module.exports = {
   updateUser,
   deleteUser,
   getUsers,
-  getTransactions,
-  getTransaction,
-  addTransaction,
-  verifyUserTransaction,
-  deleteTransaction,
+  getPayments,
+  getPayment,
+  addPayment,
+  verifyUserPayment,
+  deletePayment,
 };

@@ -1,5 +1,5 @@
 const User = require("../../models/User");
-const Transaction = require("../../models/Transaction");
+const Payment = require("../../models/Payment");
 const fs = require("fs");
 const path = require("path");
 const jwt = require("jsonwebtoken");
@@ -132,10 +132,10 @@ const updateUser = async (req, res, next) => {
   }
 };
 
-const getMyTransaction = async (req, res, next) => {
+const getMyPayment = async (req, res, next) => {
   try {
     const user = req.body.validateUser;
-    const myTransaction = await Transaction.find(
+    const myTransaction = await Payment.find(
       { "users.user_id": user.id },
       {
         title: 1,
@@ -160,7 +160,7 @@ const getMyTransaction = async (req, res, next) => {
   }
 };
 
-const updateMyTransaction = async (req, res, next) => {
+const updateMyPayment = async (req, res, next) => {
   try {
     const _id = req.params.id;
     if (!req.file) {
@@ -181,7 +181,7 @@ const updateMyTransaction = async (req, res, next) => {
     }
     const user = req.body.validateUser;
     const date = new Date().toISOString().split("T")[0];
-    const myTransaction = await Transaction.findOneAndUpdate(
+    const myTransaction = await Payment.findOneAndUpdate(
       { _id, "users.user_id": user.id },
       {
         $set: { "users.$.payment_date": date, "users.$.image": req.file.path },
@@ -552,8 +552,8 @@ module.exports = {
   loginUser,
   getUser,
   updateUser,
-  getMyTransaction,
-  updateMyTransaction,
+  getMyPayment,
+  updateMyPayment,
   withLevelGetUsers,
   withLevelAddHafalan,
   withLevelAddKitab,

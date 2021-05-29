@@ -17,7 +17,7 @@ routes.post("/", formHandler, adminControllers.login);
 
 // ----------------------- USER
 
-routes.get("/user", formHandler, auth, checkAdmin, adminControllers.getUsers);
+routes.get("/user", auth, checkAdmin, adminControllers.getUsers);
 routes.post(
   "/user",
   userUpload,
@@ -42,32 +42,27 @@ routes.delete(
 
 // ------------------------ TRANSACTION
 
-routes.get("/transaction", auth, checkAdmin, adminControllers.getTransactions);
-routes.get(
-  "/transaction/:id",
-  auth,
-  checkAdmin,
-  adminControllers.getTransaction
-);
+routes.get("/transaction", auth, checkAdmin, adminControllers.getPayments);
+routes.get("/transaction/:id", auth, checkAdmin, adminControllers.getPayment);
 routes.post(
   "/transaction",
   formHandler,
   auth,
   checkAdmin,
-  adminControllers.addTransaction
+  adminControllers.addPayment
 );
 routes.put(
   "/transaction/:id",
   formHandler,
   auth,
   checkAdmin,
-  adminControllers.verifyUserTransaction
+  adminControllers.verifyUserPayment
 );
 routes.delete(
   "/transaction/:id",
   auth,
   checkAdmin,
-  adminControllers.deleteTransaction
+  adminControllers.deletePayment
 );
 
 module.exports = routes;
