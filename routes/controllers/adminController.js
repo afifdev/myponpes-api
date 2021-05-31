@@ -41,8 +41,19 @@ const login = async (req, res, next) => {
 
 const getUsers = async (req, res, next) => {
   const username = req.query.username;
+  if (!username || username === "") {
+    return res.json({
+      message: "Error",
+      data: "Please check your username",
+    });
+  }
   try {
-    const user = await User.find({ username });
+    const user = await User.find(
+      {
+        username: { $regex: new RegExp(username) },
+      },
+      { progress: 0, password: 0 }
+    );
     return res.json({
       message: "Success",
       data: user,
@@ -272,6 +283,9 @@ const addPayment = async (req, res, next) => {
       !req.body.amount ||
       !req.body.due_date ||
       !req.body.ref_code ||
+      !req.body.category ||
+      !req.body.group ||
+      !["all", "selected"].includes(req.body.group) ||
       !req.body.users_id ||
       req.body.users_id.length === 0
     ) {
@@ -280,19 +294,39 @@ const addPayment = async (req, res, next) => {
         data: "Fill out the fields",
       });
     }
+    const prevRefCode = await Payment.find(
+      { ref_code: req.body.ref_code },
+      { ref_code: 1 }
+    );
+    if (prevRefCode) {
+      return res.json({
+        message: "Error",
+        data: "ref_code should be unique",
+      });
+    }
     const insertedUser = [];
-    for (let i = 0; i < req.body.users_id.length; i++) {
-      if (!isValidObjectId(req.body.users_id[i])) {
-        return res.json({ message: "Error", data: "Invalid identifier" });
+    if (req.body.group === "all") {
+      const checkUsers = await User.find({}, { _id: 1 });
+      checkUsers.map((u) => {
+        insertedUser.push({ user_id: u._id });
+      });
+    } else {
+      for (let i = 0; i < req.body.users_id.length; i++) {
+        if (!isValidObjectId(req.body.users_id[i])) {
+          return res.json({ message: "Error", data: "Invalid identifier" });
+        }
+        const checkUserId = await User.findOne(
+          { _id: req.body.users_id[i] },
+          { _id: 1 }
+        );
+        if (!checkUserId) {
+          return res.json({
+            message: "Error",
+            data: "Cannot find user",
+          });
+        }
+        insertedUser.push({ user_id: req.body.users_id[i] });
       }
-      const checkUserId = await User.findOne({ _id: req.body.users_id[i] });
-      if (!checkUserId) {
-        return res.json({
-          message: "Error",
-          data: "Cannot find user",
-        });
-      }
-      insertedUser.push({ user_id: req.body.users_id[i] });
     }
     const data = {
       title: req.body.title,
@@ -300,6 +334,7 @@ const addPayment = async (req, res, next) => {
       amout: req.body.amount,
       due_date: req.body.due_date,
       ref_code: req.body.ref_code,
+      category: req.body.category,
       users: insertedUser,
     };
     const transaction = new Payment({
